@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MFA Verification | Secure Auth</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+<div class="container">
+    <h2>Two-Factor Authentication</h2>
+    <p class="subtitle">Enter the 6-digit code from your authenticator app.</p>
+
+    <div id="messageBox" class="msg"></div>
+
+    <form id="mfaForm">
+        <div class="form-group">
+            <label for="code">Activation Code</label>
+            <input type="text" id="code" maxlength="6" pattern="\d{6}">
+        </div>
+        <button type="submit">Verify</button>
+    </form>
+</div>
+
+<script>
+    const API_BASE_URL = 'http://localhost:5052'; // backend origin
+
+    document.getElementById('mfaForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const msgBox = document.getElementById('messageBox');
+        msgBox.className = 'msg';
+        msgBox.textContent = 'Verifying...';
+        msgBox.style.display = 'block';
+
+        const code = document.getElementById('code').value.trim();
+        const email = localStorage.getItem('mfaEmail');
+
+        if (!email) {
+            msgBox.className = 'msg error';
+            msgBox.textContent = 'Session expired. Please log in again.';
+            setTimeout(() => window.location.href = 'login.html', 1200);
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/auth/verify-mfa`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, code })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                msgBox.className = 'msg success';
+                msgBox.textContent = result.message || 'MFA verified';
+                localStorage.setItem('jwt', result.token);
+                localStorage.removeItem('mfaEmail');
+                setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
+            } else {
+                msgBox.className = 'msg error';
+                msgBox.textContent = result.message || 'MFA verification failed.';
+            }
+        } catch (err) {
+            console.error(err);
+            msgBox.className = 'msg error';
+            msgBox.textContent = 'An error occurred during verification.';
+        }
+    });
+</script>
+</body>
+</html>

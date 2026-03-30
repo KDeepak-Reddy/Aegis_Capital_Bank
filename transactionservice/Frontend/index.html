@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aegis Capital | Transactions</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+<!-- Unauthenticated State -->
+<div class="container" id="unauthState">
+    <h2>Access Denied</h2>
+    <p class="subtitle">Please login and select an account first.</p>
+    <button id="redirectToAccountsBtn">Go to Accounts</button>
+</div>
+
+<!-- Main Authenticated Container -->
+<div class="container hidden" id="mainContainer">
+
+    <!-- Header -->
+    <div class="header" style="flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <svg class="bank-icon" style="width:40px;height:40px;margin:0;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7V11C2 16.5 6.2 21.6 12 23C17.8 21.6 22 16.5 22 11V7L12 2ZM12 11H20C19.5 15.1 16.3 18.7 12 20.8V11H4V8.2L12 4.2V11Z" fill="url(#goldGradient)"/><defs><linearGradient id="goldGradient" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse"><stop stop-color="#BF953F"/><stop offset="0.5" stop-color="#FCF6BA"/><stop offset="1" stop-color="#B38728"/></linearGradient></defs></svg>
+            <div>
+                <h2 style="font-size: 20px; color: var(--gold-2);" class="brand-name">Aegis Capital</h2>
+                <div class="account-badge" id="accountBadge">Account: ---</div>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="secondary" id="backToAccountsBtn" style="padding:8px 16px;margin:0;">← Back to Accounts</button>
+        </div>
+    </div>
+
+    <!-- Message Box -->
+    <div id="messageBox" class="msg"></div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-nav">
+        <button class="tab-btn active" data-tab="deposit">Deposit</button>
+        <button class="tab-btn" data-tab="withdraw">Withdraw</button>
+        <button class="tab-btn" data-tab="transfer">Transfer</button>
+        <button class="tab-btn" data-tab="history">History</button>
+    </div>
+
+    <!-- Tab Content: Deposit -->
+    <div class="tab-content active" id="tab-deposit">
+        <h3>Deposit Funds</h3>
+        <p class="subtitle">Add money to your account</p>
+        <form id="depositForm">
+            <div class="form-group">
+                <label for="depositAmount">Amount (₹)</label>
+                <input type="number" id="depositAmount" placeholder="Enter amount" min="1" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="depositPin">Account PIN</label>
+                <input type="password" id="depositPin" placeholder="4 or 6 digit PIN" required>
+            </div>
+            <button type="submit" id="depositBtn">
+                <span class="btn-icon">↓</span> Deposit
+            </button>
+        </form>
+    </div>
+
+    <!-- Tab Content: Withdraw -->
+    <div class="tab-content" id="tab-withdraw">
+        <h3>Withdraw Funds</h3>
+        <p class="subtitle">Withdraw money from your account</p>
+        <form id="withdrawForm">
+            <div class="form-group">
+                <label for="withdrawAmount">Amount (₹)</label>
+                <input type="number" id="withdrawAmount" placeholder="Enter amount" min="1" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="withdrawPin">Account PIN</label>
+                <input type="password" id="withdrawPin" placeholder="4 or 6 digit PIN" required>
+            </div>
+            <button type="submit" id="withdrawBtn">
+                <span class="btn-icon">↑</span> Withdraw
+            </button>
+        </form>
+    </div>
+
+    <!-- Tab Content: Transfer -->
+    <div class="tab-content" id="tab-transfer">
+        <h3>Transfer Funds</h3>
+        <p class="subtitle">Send money to another account</p>
+
+        <!-- Transfer Mode Toggle -->
+        <div class="transfer-toggle">
+            <button type="button" class="toggle-btn active" id="toggleOwnBtn" data-mode="own">Own Account</button>
+            <button type="button" class="toggle-btn" id="toggleExternalBtn" data-mode="external">External Account</button>
+        </div>
+
+        <!-- Own Account Transfer -->
+        <form id="transferOwnForm">
+            <div class="form-group">
+                <label for="ownAccountSelect">Select Destination Account</label>
+                <select id="ownAccountSelect" required>
+                    <option value="">-- Select an account --</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="transferOwnAmount">Amount (₹)</label>
+                <input type="number" id="transferOwnAmount" placeholder="Enter amount" min="1" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="transferOwnPin">Account PIN</label>
+                <input type="password" id="transferOwnPin" placeholder="4 or 6 digit PIN" required>
+            </div>
+            <button type="submit" id="transferOwnBtn">
+                <span class="btn-icon">⇄</span> Transfer
+            </button>
+        </form>
+
+        <!-- External Account Transfer -->
+        <form id="transferExternalForm" class="hidden">
+            <div class="form-group">
+                <label for="extBankName">Bank Name</label>
+                <input type="text" id="extBankName" placeholder="e.g., Global Bank" required>
+            </div>
+            <div class="form-group">
+                <label for="extIfsc">IFSC Code</label>
+                <input type="text" id="extIfsc" placeholder="e.g., GLOB0001234" required>
+            </div>
+            <div class="form-group">
+                <label for="extAccNo">Account Number</label>
+                <input type="text" id="extAccNo" placeholder="Enter account number" required>
+            </div>
+            <div class="form-group">
+                <label for="transferExtAmount">Amount (₹)</label>
+                <input type="number" id="transferExtAmount" placeholder="Enter amount" min="1" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="transferExtPin">Account PIN</label>
+                <input type="password" id="transferExtPin" placeholder="4 or 6 digit PIN" required>
+            </div>
+            <button type="submit" id="transferExtBtn">
+                <span class="btn-icon">⇄</span> Transfer
+            </button>
+        </form>
+    </div>
+
+    <!-- Tab Content: History -->
+    <div class="tab-content" id="tab-history">
+        <div class="history-header">
+            <h3>Transaction History</h3>
+            <button class="secondary" id="refreshHistoryBtn" style="padding:6px 14px;margin:0;width:auto;">↻ Refresh</button>
+        </div>
+        <div id="historyLoading" class="hidden">
+            <p style="text-align:center;color:var(--text-muted);">Loading transactions...</p>
+        </div>
+        <div id="historyEmpty" class="hidden">
+            <p style="text-align:center;color:var(--text-muted);">No transactions found for this account.</p>
+        </div>
+        <div class="table-wrapper">
+            <table id="historyTable" class="hidden">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Ref Account</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="historyBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

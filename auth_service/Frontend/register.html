@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aegis Capital | Register</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+<div class="container">
+    <div class="logo-container">
+        <svg class="bank-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7V11C2 16.5 6.2 21.6 12 23C17.8 21.6 22 16.5 22 11V7L12 2ZM12 11H20C19.5 15.1 16.3 18.7 12 20.8V11H4V8.2L12 4.2V11Z" fill="url(#goldGradient)"/><defs><linearGradient id="goldGradient" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse"><stop stop-color="#BF953F"/><stop offset="0.5" stop-color="#FCF6BA"/><stop offset="1" stop-color="#B38728"/></linearGradient></defs></svg>
+        <h1 class="brand-name">Aegis Capital</h1>
+    </div>
+    <h2>Create Account</h2>
+    <p class="subtitle">Join us to experience premium banking.</p>
+
+    <div id="messageBox" class="msg"></div>
+
+    <form id="registerForm">
+        <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" required placeholder="John Doe">
+        </div>
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" required placeholder="john@example.com">
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" required placeholder="••••••••">
+        </div>
+        <div class="form-group">
+            <label for="dob">Date of Birth</label>
+            <input type="date" id="dob" required>
+        </div>
+        <div class="form-group">
+            <label for="mobileNo">Mobile Number</label>
+            <input type="text" id="mobileNo" required placeholder="+1234567890">
+        </div>
+        <div class="form-group">
+            <label for="panNo">PAN Number</label>
+            <input type="text" id="panNo" required placeholder="ABCDE1234F">
+        </div>
+        <button type="submit">Sign Up</button>
+    </form>
+
+    <div class="links">
+        Already have an account? <a href="login.html">Log In</a>
+    </div>
+</div>
+
+<script>
+    const API_BASE_URL = 'http://localhost:5052'; // backend origin
+
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const msgBox = document.getElementById('messageBox');
+        msgBox.className = 'msg';
+        msgBox.textContent = 'Registering...';
+        msgBox.style.display = 'block';
+
+        const data = {
+            name: document.getElementById('name').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            password: document.getElementById('password').value,
+            dob: document.getElementById('dob').value,
+            mobileNo: document.getElementById('mobileNo').value.trim(),
+            panNo: document.getElementById('panNo').value.trim()
+        };
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                msgBox.className = 'msg success';
+                let successHtml = (result.message || 'Registration successful.') + '<br><br>';
+                if (result.secretImageUri) {
+                    successHtml += '<img src="' + result.secretImageUri + '" alt="QR Code" style="margin-top: 15px; border-radius: 8px;"><br><br>';
+                }
+                successHtml += '<a href="login.html" style="color:var(--primary);text-decoration:underline;">Go to Log in</a>';
+                msgBox.innerHTML = successHtml;
+                document.getElementById('registerForm').reset();
+            } else {
+                msgBox.className = 'msg error';
+                msgBox.textContent = result.message || 'Registration failed.';
+            }
+        } catch (err) {
+            console.error(err);
+            msgBox.className = 'msg error';
+            msgBox.textContent = 'An error occurred during registration.';
+        }
+    });
+</script>
+</body>
+</html>

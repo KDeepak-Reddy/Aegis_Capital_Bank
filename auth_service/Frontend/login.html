@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aegis Capital | Login</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+<div class="container">
+    <div class="logo-container">
+        <svg class="bank-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7V11C2 16.5 6.2 21.6 12 23C17.8 21.6 22 16.5 22 11V7L12 2ZM12 11H20C19.5 15.1 16.3 18.7 12 20.8V11H4V8.2L12 4.2V11Z" fill="url(#goldGradient)"/><defs><linearGradient id="goldGradient" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse"><stop stop-color="#BF953F"/><stop offset="0.5" stop-color="#FCF6BA"/><stop offset="1" stop-color="#B38728"/></linearGradient></defs></svg>
+        <h1 class="brand-name">Aegis Capital</h1>
+    </div>
+    <h2>Welcome Back</h2>
+    <p class="subtitle">Enter your credentials to access your account.</p>
+
+    <div id="messageBox" class="msg"></div>
+
+    <form id="loginForm">
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" required placeholder="john@example.com">
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" required placeholder="••••••••">
+        </div>
+        <button type="submit">Log In</button>
+    </form>
+
+    <div class="links">
+        <a href="forgot-password.html">Forgot Password?</a>
+        &nbsp;&nbsp;|&nbsp;&nbsp;
+        Don't have an account? <a href="register.html">Sign Up</a>
+    </div>
+</div>
+
+<script>
+    const API_BASE_URL = 'http://localhost:5052'; // backend origin
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msgBox = document.getElementById('messageBox');
+      msgBox.className = 'msg';
+      msgBox.textContent = 'Authenticating...';
+      msgBox.style.display = 'block';
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        // Helpful: log details to see what's going on
+        const contentType = response.headers.get('content-type') || '';
+        const isJson = contentType.includes('application/json');
+        const result = isJson ? await response.json() : { message: await response.text() };
+
+        if (response.ok) {
+          msgBox.className = 'msg success';
+          msgBox.textContent = result.message || 'Login success';
+
+          if (result.mfaRequired) {
+            localStorage.setItem('mfaEmail', email);
+            setTimeout(() => { window.location.href = 'mfa.html'; }, 800);
+          } else {
+            localStorage.setItem('jwt', result.token);
+            setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
+          }
+        } else {
+          console.error('Login failed:', response.status, result);
+          msgBox.className = 'msg error';
+          msgBox.textContent = result.message || `Login failed (HTTP ${response.status}).`;
+        }
+      } catch (err) {
+        console.error('Network error during login:', err);
+        msgBox.className = 'msg error';
+        msgBox.textContent = 'An error occurred during login.';
+      }
+    });
+</script>
+</body>
+</html>

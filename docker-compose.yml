@@ -1,0 +1,120 @@
+version: '3.8'
+
+services:
+  # ────────────────────────────────────────────────────────
+  # MySQL Database (shared instance, 3 databases)
+  # ────────────────────────────────────────────────────────
+  mysql:
+    image: mysql:8.0
+    container_name: aegis-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: Vishnu@123
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pVishnu@123"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ────────────────────────────────────────────────────────
+  # Auth Service Backend (port 5052)
+  # ────────────────────────────────────────────────────────
+  auth-backend:
+    build:
+      context: ./auth_service/Backend
+    container_name: aegis-auth-backend
+    restart: unless-stopped
+    ports:
+      - "5052:5052"
+    environment:
+      SERVER_PORT: 5052
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/auth_Service?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Vishnu@123
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  # ────────────────────────────────────────────────────────
+  # Account Service Backend (port 5050)
+  # ────────────────────────────────────────────────────────
+  account-backend:
+    build:
+      context: ./account_service/Backend
+    container_name: aegis-account-backend
+    restart: unless-stopped
+    ports:
+      - "5050:5050"
+    environment:
+      SERVER_PORT: 5050
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/account_Service?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Vishnu@123
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  # ────────────────────────────────────────────────────────
+  # Transaction Service Backend (port 5005)
+  # ────────────────────────────────────────────────────────
+  transaction-backend:
+    build:
+      context: ./transactionservice
+    container_name: aegis-transaction-backend
+    restart: unless-stopped
+    ports:
+      - "5005:5005"
+    environment:
+      SERVER_PORT: 5005
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/transaction_Service?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Vishnu@123
+      ACCOUNT_SERVICE_URL: http://account-backend:5050
+    depends_on:
+      mysql:
+        condition: service_healthy
+      account-backend:
+        condition: service_started
+
+  # ────────────────────────────────────────────────────────
+  # Auth Frontend (port 5173)
+  # ────────────────────────────────────────────────────────
+  auth-frontend:
+    build:
+      context: ./auth_service/Frontend
+    container_name: aegis-auth-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+
+  # ────────────────────────────────────────────────────────
+  # Account Frontend (port 5501)
+  # ────────────────────────────────────────────────────────
+  account-frontend:
+    build:
+      context: ./account_service/Frontend
+    container_name: aegis-account-frontend
+    restart: unless-stopped
+    ports:
+      - "5501:5501"
+
+  # ────────────────────────────────────────────────────────
+  # Transaction Frontend (port 5502)
+  # ────────────────────────────────────────────────────────
+  transaction-frontend:
+    build:
+      context: ./transactionservice/Frontend
+    container_name: aegis-transaction-frontend
+    restart: unless-stopped
+    ports:
+      - "5502:5502"
+
+volumes:
+  mysql_data:
+    name: bankingsystem-postintegration-main_mysql_data
+    external: true

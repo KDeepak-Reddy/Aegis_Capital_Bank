@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aegis Capital | Accounts</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+<div class="container hidden" id="mainContainer">
+    <div class="header" style="flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <svg class="bank-icon" style="width:40px;height:40px;margin:0;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7V11C2 16.5 6.2 21.6 12 23C17.8 21.6 22 16.5 22 11V7L12 2ZM12 11H20C19.5 15.1 16.3 18.7 12 20.8V11H4V8.2L12 4.2V11Z" fill="url(#goldGradient)"/><defs><linearGradient id="goldGradient" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse"><stop stop-color="#BF953F"/><stop offset="0.5" stop-color="#FCF6BA"/><stop offset="1" stop-color="#B38728"/></linearGradient></defs></svg>
+            <div>
+                <h2 style="font-size: 20px; color: var(--gold-2);" class="brand-name">Aegis Capital</h2>
+                <div class="user-email" id="userEmailDisplay"></div>
+            </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <button class="secondary" id="backToDashboardBtn" style="padding: 8px 16px; margin: 0;">← Back to Dashboard</button>
+            <button class="secondary" id="logoutBtn" style="padding: 8px 16px; margin: 0;">Logout</button>
+        </div>
+    </div>
+
+    <div id="messageBox" class="msg"></div>
+
+    <!-- State 1: Loading -->
+    <div id="loadingState">
+        <p style="text-align: center; color: var(--text-muted);">Loading accounts...</p>
+    </div>
+
+    <!-- State 2: Accounts Dashboard (Existing User) -->
+    <div id="dashboardState" class="hidden">
+        <div class="card-grid" id="accountsGrid">
+            <!-- Account Cards will be injected here -->
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <p class="subtitle">Need another account?</p>
+            <button id="showCreateFormBtn" style="max-width: 200px;">Create New Account</button>
+        </div>
+    </div>
+
+    <!-- State 3: Create Account Form (New User or Existing adding another) -->
+    <div id="createAccountState" class="hidden">
+        <h3 style="margin-bottom: 20px;" id="createFormTitle">Create New Account</h3>
+        <form id="createAccountForm">
+            <div class="form-group">
+                <label for="bankName">Bank Name</label>
+                <input type="text" id="bankName" placeholder="e.g., Global Bank" required>
+            </div>
+            <div class="form-group">
+                <label for="ifscCode">IFSC Code</label>
+                <input type="text" id="ifscCode" placeholder="e.g., GLOB0001234" required>
+            </div>
+            <div class="form-group">
+                <label for="initialBalance">Initial Deposit (₹)</label>
+                <input type="number" id="initialBalance" placeholder="0.00" min="0" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="pin">Account PIN (4-6 digits)</label>
+                <input type="password" id="pin" placeholder="Enter PIN" pattern="\d{4,6}" required title="Please enter a 4 to 6 digit PIN.">
+            </div>
+            
+            <button type="submit" id="submitCreateBtn">Create Account</button>
+            <button type="button" class="secondary" id="cancelCreateBtn">Cancel</button>
+        </form>
+    </div>
+
+</div>
+
+<!-- Unauthenticated State -->
+<div class="container" id="unauthState">
+    <h2>Access Denied</h2>
+    <p class="subtitle">Please login to the Authentication Service first.</p>
+    <button id="redirectToLoginBtn">Go to Login</button>
+</div>
+
+<!-- Reset PIN Modal -->
+<div id="resetPinModal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
+    <div style="background:rgba(18,24,38,0.98);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:36px;width:100%;max-width:420px;margin:20px;animation:fadeInUp 0.3s ease;">
+        <h3 style="margin-bottom:6px;text-align:center;">🔒 Reset Account PIN</h3>
+        <p style="text-align:center;color:var(--text-secondary);font-size:13px;margin-bottom:24px;">Account: <strong id="resetPinAccNo" style="color:var(--gold-2);"></strong></p>
+        <div id="resetPinMsg" class="msg"></div>
+        <form id="resetPinForm">
+            <div class="form-group">
+                <label for="oldPin">Current PIN</label>
+                <input type="password" id="oldPin" placeholder="Enter current PIN" pattern="\d{4,6}" required>
+            </div>
+            <div class="form-group">
+                <label for="newPinInput">New PIN (4–6 digits)</label>
+                <input type="password" id="newPinInput" placeholder="Enter new PIN" pattern="\d{4,6}" required>
+            </div>
+            <div class="form-group">
+                <label for="confirmPin">Confirm New PIN</label>
+                <input type="password" id="confirmPin" placeholder="Repeat new PIN" pattern="\d{4,6}" required>
+            </div>
+            <button type="submit" id="resetPinSubmitBtn">Update PIN</button>
+            <button type="button" class="secondary" onclick="closeResetPinModal()" style="margin-top:10px;">Cancel</button>
+        </form>
+    </div>
+</div>
+
+<script src="app.js" defer></script>
+</body>
+</html>
